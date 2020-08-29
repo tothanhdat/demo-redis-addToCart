@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+<br><br>
+<div  class="w-50 p-3" style="margin-left: 50px">
+    <form >
+        <div class="form-group">
+            <label for="exampleInputEmail1">Nhập ID</label>
+            <input type="text" class="form-control" id="id" aria-describedby="emailHelp" placeholder="Enter ID">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Nhập tên</label>
+            <input type="text" class="form-control" id="key" aria-describedby="emailHelp" placeholder="Enter key">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Nhập tuổi</label>
+            <input type="text" class="form-control" id="value" placeholder="Enter value">
+        </div>
+        
+        <button id="btnSubmitHashes" type="submit" class="btn btn-primary">Submit</button>
+    </form>
+<br>
+<form >
+        
+        <div class="form-group">
+            <label for="exampleInputPassword1">Xem thông tin Hashes</label>
+            <input type="text" class="form-control" id="idHash" placeholder="Nhập Hashes Name">
+        </div>
+        
+        <button id="btnSearchHash" type="submit" class="btn btn-primary">Xem thong tin</button>
+        <button id="btnDelete" type="submit" class="btn btn-primary">Xoa user nay</button>
+    </form>
+    
+</div>
+
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).on('click', '#btnSubmitHashes', function(e) {
+        e.preventDefault();
+
+        let id = $('#id').val().trim();
+        let key = $('#key').val().trim();
+        let value = $('#value').val().trim();
+
+        $.ajax({
+            url: `/add-hashes`,
+            method: 'POST',
+            data: {
+                id, key, value
+            },
+            success: resp => {
+                console.log({ resp })
+                console.log("successssssssssss")
+                if (!resp.error) {
+                    alert('Thêm thành công');
+                    //location.reload();
+                } else {
+                    return alert('Thêm thất bại');
+                }
+            },
+            error: err => console.log({
+                err
+            })
+        });
+    })
+
+    $(document).on('click', '#btnSearchHash', function(e) {
+        e.preventDefault();
+        let id = $('#idHash').val().trim();
+        //console.log(id)
+        $.ajax({
+            url: `/info-hashes/${id}`,
+            method: 'GET',
+            success: resp => {
+                console.log({ resp })
+                if (!resp.error) {
+                    //alert('Thêm thành công');
+                    location.href = `/info-hashes/${id}`;
+                } else {
+                    return alert('Thất bại');
+                }
+            },
+            error: err => console.log({
+                err
+            })
+        });
+    })
+    
+
+    
+</script>
