@@ -2,11 +2,12 @@
 const express           = require('express');
 const app               = express();
 const bodyParser        = require('body-parser');
+const fetch             = require("node-fetch");
 
 const redis = require("redis");
 const client = redis.createClient();
 
-const REDIS_BASIC        = require('./model/hash');
+const REDIS_BASIC        = require('./model/redis_basic');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -55,6 +56,42 @@ app.get('/', async (req, res) => {
     res.render('menu', {listProduct, myCart });
 })
 
+app.get('/photos', (req, res) => {
+ 
+    // key to store results in Redis store
+    const photosRedisKey = 'user:photos';
+ 
+    // Try fetching the result from Redis first in case we have it cached
+    return client.get(photosRedisKey, (err, photos) => {
+ 
+        // If that key exists in Redis store
+        if (photos) {
+ 
+            return res.json({ source: 'cache', data: JSON.parse(photos) })
+ 
+        } else { // Key does not exist in Redis store
+ 
+            // Fetch directly from remote api
+            fetch('https://jsonplaceholder.typicode.com/photos')
+                .then(response => response.json())
+                .then(photos => {
+ 
+                    // Save the  API response in Redis store,  data expire time in 3600 seconds, it means one hour
+                    client.setex(photosRedisKey, 3600, JSON.stringify(photos))
+ 
+                    // Send JSON response to client
+                    return res.json({ source: 'api', data: photos })
+ 
+                })
+                .catch(error => {
+                    console.log(error)
+                    // send error to the client 
+                    return res.json(error.toString())
+                })
+        }
+    });
+});
+
 app.get('/hashes', (req, res) => {
     res.render('hashes');
 })
@@ -95,6 +132,14 @@ app.get('/remove-in-cart/:productID', async (req, res) => {
     
     let removeInCart = await REDIS_BASIC.removeInCart({ nameCart, productID });
     res.json(removeInCart)
+})
+
+app.get('/remove-all-cart/:nameCart', async (req, res) => {
+
+    let { nameCart } = req.params;
+    
+    let removeAllCart = await REDIS_BASIC.removeAllCart({ nameCart });
+    res.json(removeAllCart)
 })
 
 app.listen(3000, () => console.log('Server started at port 3000'));

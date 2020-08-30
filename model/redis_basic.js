@@ -92,6 +92,28 @@ module.exports = class RedisBasic {
         });
     }
 
+    //Xóa tất cả giỏ hàng
+    static removeAllCart({ nameCart }) {
+        return new Promise(async resolve => {
+            try {
+
+                if (!nameCart)
+                    return resolve({ error: true, message: 'params_invalid' });
+                
+                await client.del(nameCart, function(err, reply){
+                    if(err){
+                        return resolve({ error: true, message: err.message });
+                    } else {
+                        return resolve({ error: false, data: { reply } });
+                    }
+                });
+
+            } catch (error) {
+                return resolve({ error: true, message: error.message });
+            }
+        });
+    }
+
     //Giỏ hàng
     static myCart({ nameCart }) {
         return new Promise(async resolve => {

@@ -9,6 +9,7 @@
 
 <div class="container">
     <h3 class="h3">Demo Redis ------- <a href=""> My cart (<%=myCart.data.reply.length%>)</a></h3>
+    <h3 class="h3 removeAllCart"><a href=""> Clear Cart</a></h3>
     <div class="row">
         <% listProduct.forEach(product => { %>
         <div class="col-md-3 col-sm-6">
@@ -180,6 +181,30 @@
                 console.log(resp.data)
                 if (!resp.error) {
                     alert('Thành công');
+                    location.reload();
+                } else {
+                    return alert('Thất bại');
+                }
+            },
+            error: err => console.log({
+                err
+            })
+        });
+    });
+
+    //Xóa tất cả
+    $('.removeAllCart').click(function(e) {
+        e.preventDefault();
+
+        let nameCart = "myCart";
+        
+        $.ajax({
+            url: `/remove-all-cart/${nameCart}`,
+            method: 'GET',
+            success: resp => {
+                console.log(resp.data)
+                if (!resp.error) {
+                    alert('Xóa Thành công');
                     location.reload();
                 } else {
                     return alert('Thất bại');
