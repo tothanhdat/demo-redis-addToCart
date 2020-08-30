@@ -3,11 +3,14 @@ const express           = require('express');
 const app               = express();
 const bodyParser        = require('body-parser');
 const fetch             = require("node-fetch");
+const mongoose          = require('mongoose');
 
 const redis = require("redis");
 const client = redis.createClient();
 
 const REDIS_BASIC        = require('./model/redis_basic');
+const PHOTO_STORE        = require('./model/photo-store');
+const PHOTO_STORE_COLL   = require('./database/photo_store-coll');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -142,7 +145,54 @@ app.get('/remove-all-cart/:nameCart', async (req, res) => {
     res.json(removeAllCart)
 })
 
-app.listen(3000, () => console.log('Server started at port 3000'));
+//Thêm cửa hàng
+app.post('/add-photo', async (req, res) => {
+    try {
+
+        let { name, place, available } = req.body;
+
+        let infoStorePhoto = await PHOTO_STORE.insert({ name, place, available })
+        res.json(infoStorePhoto)
+    } catch (error) {
+        console.log(error);
+    }
+    
+})
+
+app.get('/stores', (req, res) => {
+
+    // let lng = "106.797263"
+    // let lat = "10.849314"
+    //let placeHome = "lng, lat";
+
+    let { lng, lat } = req.query;
+
+    PHOTO_STORE_COLL.aggregate([
+        {
+            $geoNear: {
+                near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+                maxDistance: 2000,
+                distanceField: "dist.calculated",
+                includeLocs: "dist.location", // Returns distance
+                spherical: true
+            }
+        }
+    ]).then(stores => res.send(stores));
+});
+
+const uri = 'mongodb://localhost/demo-geo';
+//const uri = 'mongodb://datchen:datchen123@ds261238.mlab.com:61238/lttn-py';
+//const uri = 'mongodb+srv://datchen:datchen123@cluster0-mbx1o.mongodb.net/test';
+
+const PORT = process.env.PORT || 3000;
+
+mongoose.set('useCreateIndex', true); //ẩn cảnh báo
+mongoose.set('useUnifiedTopology', true); // ẩn cảnh báo
+
+mongoose.connect(uri, { useNewUrlParser: true });
+mongoose.connection.once('open', () => {
+    app.listen(PORT, () => console.log(`Server started at PORT ${PORT}`));
+});
 
 
 
