@@ -53,11 +53,12 @@ const listProduct = [
 
 app.get('/', async (req, res) => {
 
-    let nameCart = "myCart";
-    let myCart = await REDIS_BASIC.myCart({ nameCart });
-    //console.log(myCart.data.reply)
-    res.render('menu', {listProduct, myCart });
-})
+    // let nameCart = "myCart";
+    // let myCart = await REDIS_BASIC.myCart({ nameCart });
+    // //console.log(myCart.data.reply)
+    // res.render('menu', {listProduct, myCart });
+    res.redirect("/find-store")
+});
 
 app.get('/photos', (req, res) => {
  
@@ -159,25 +160,38 @@ app.post('/add-photo', async (req, res) => {
     
 })
 
-app.get('/stores', (req, res) => {
+app.post('/stores', async (req, res) => {
+    try {   
+         // let lng = "106.797263"
+        // let lat = "10.849314"
+        //let placeHome = "lng, lat";
+        let { lng, lat, maxDis } = req.body;
 
-    // let lng = "106.797263"
-    // let lat = "10.849314"
-    //let placeHome = "lng, lat";
+        let listPhotoStore = await PHOTO_STORE.getList({ lng, lat, maxDis });
+        res.json(listPhotoStore);
 
-    let { lng, lat } = req.query;
+    } catch (error) {
+        console.log(error);
+    }
+});
 
-    PHOTO_STORE_COLL.aggregate([
-        {
-            $geoNear: {
-                near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
-                maxDistance: 2000,
-                distanceField: "dist.calculated",
-                includeLocs: "dist.location", // Returns distance
-                spherical: true
-            }
-        }
-    ]).then(stores => res.send(stores));
+app.get('/store-near', async (req, res) => {
+    try {   
+        
+        let { lng, lat } = req.query;
+
+        let listPhotoStoreNear = await PHOTO_STORE.getListStoreNear({ lng, lat });
+        res.json(listPhotoStoreNear);
+
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+app.get('/find-store', async (req, res) => {
+
+    res.render("find-store");
 });
 
 const uri = 'mongodb://localhost/demo-geo';

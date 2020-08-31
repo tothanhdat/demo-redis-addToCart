@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+    <br><br>
+    <div style="max-width: 700px; margin-left: 20px">
+    <button type="button" class="btn btn-info btnGetLocation">Xem vị trí của bạn</button>
+    <br>
+    <h2><p class="locationtxt"></p></h2>
+    <hr>
+
+        <h4>Tìm quán Caffe xung quanh bạn</h4>
+
+        <div class="input-group mb-3">
+        <input type="text" class="form-control maxDistance" placeholder="Nhập khoảng cách" aria-label="Recipient's username" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary btnFindStore" type="button">Tìm kiếm</button>
+        </div>
+    </div>
+    <br>
+    <h4>Danh sách cửa hàng gần đây</h4>
+    <div class="list-store">
+        <ul class="list-group list-hide">
+            <li class="list-group-item">Cras justo odio</li>
+        </ul>
+    </div>
+    </div>
+    
+    
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+
+    $(document).ready(function() {
+        $('.list-hide').hide();
+    })
+
+
+    $(document).on('keyup', '.maxDistance', function(e) {
+        e.preventDefault();
+
+        if ("geolocation" in navigator){ //check geolocation available 
+		//try to get user current location using getCurrentPosition() method
+		navigator.geolocation.getCurrentPosition(function(position){ 
+            //console.log({ position });
+            $(".locationtxt").html("Your place: " + position.coords.latitude + ", " + position.coords.longitude);
+            let lng = position.coords.longitude;
+            let lat = position.coords.latitude;
+            let maxDis = $('.maxDistance').val().trim();
+            $.ajax({
+                url: `/stores`,
+                method: 'POST',
+                data: { lng, lat, maxDis },
+                success: resp => {
+                    console.log({ resp })
+                    let listStore = resp.data;
+                    if (!resp.error) {
+                        if(listStore.length > 0){
+                            $('.list-store').empty();
+                            listStore.forEach(store => {
+                            $('.list-store').append(`
+                                <ul class="list-group">
+                                    <li class="list-group-item">${store.name} -- 
+                                    Tọa độ ${store.place.coordinates[0]},${store.place.coordinates[1]} -- 
+                                    Cách ${(store.dist.calculated/1000).toFixed(2)}km
+                                    </li>
+                                </ul>
+                            `);
+
+                            })
+                        }else{
+                            $('.list-store').empty();
+                            $('.list-store').append(`<p>Không tìm thấy</p>`)
+                        }
+                            
+                    } else {
+                        //return alert('Thất bại');
+                    }
+                },
+                error: err => console.log({
+                    err
+                })
+            });
+		});
+        }else{
+            console.log("Browser doesn't support geolocation!");
+        }
+
+        let lng = "106.797263";
+        let lat = "10.849314";
+        let maxDis = $('.maxDistance').val().trim();
+        //console.log({ lng, lat, maxDis });
+        
+    })
+
+    //Xem vị trí của client
+    $(".btnGetLocation").click(function () { //user clicks button
+	if ("geolocation" in navigator){ //check geolocation available 
+		//try to get user current location using getCurrentPosition() method
+		navigator.geolocation.getCurrentPosition(function(position){ 
+                console.log({ position });
+				$(".locationtxt").html("Your place: " + position.coords.latitude + ", " + position.coords.longitude);
+                let lng = position.coords.longitude;
+                let lat = position.coords.latitude;
+                $.ajax({
+                    url: `/store-near?lng=${lng}&lat=${lat}`,
+                    method: 'GET',
+                    success: resp => {
+                        console.log({ resp })
+                        let listStore = resp.data;
+                        if (!resp.error) {
+                            if(listStore.length > 0){
+                                
+                                $('.list-store').empty();
+                                listStore.forEach(store => {
+
+                                    $('.list-store').append(`
+                                        <ul class="list-group">
+                                            <li class="list-group-item">${store.name} -- 
+                                            Tọa độ ${store.place.coordinates[0]},${store.place.coordinates[1]} -- 
+                                            Cách ${(store.dist.calculated/1000).toFixed(2)}km
+                                            </li>
+                                        </ul>
+                                    `);
+                                })
+                            }else{
+                                $('.list-store').empty();
+                                $('.list-store').append(`<p>Không tìm thấy</p>`)
+                            }
+                        } else {
+                            //return alert('Thất bại');
+                        }
+                    },
+                    error: err => console.log({
+                        err
+                    })
+                });
+		});
+	}else{
+		console.log("Browser doesn't support geolocation!");
+	}
+});
+</script>
