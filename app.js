@@ -51,12 +51,8 @@ const listProduct = [
     },
 ]
 
+//========> MENU-CART
 app.get('/', async (req, res) => {
-
-    // let nameCart = "myCart";
-    // let myCart = await REDIS_BASIC.myCart({ nameCart });
-    // //console.log(myCart.data.reply)
-    // res.render('menu', {listProduct, myCart });
     res.render("home")
 });
 
@@ -64,9 +60,36 @@ app.get('/menu-cart', async (req, res) => {
 
     let nameCart = "myCart";
     let myCart = await REDIS_BASIC.myCart({ nameCart });
-    //console.log(myCart.data.reply)
     res.render('menu', {listProduct, myCart });
 });
+
+app.get('/add-to-cart/:productID', async (req, res) => {
+
+    let { productID } = req.params;
+    let nameCart = "myCart";
+    
+    let addtoCart = await REDIS_BASIC.addToCart({ nameCart, productID });
+    res.json(addtoCart)
+})
+
+app.get('/remove-in-cart/:productID', async (req, res) => {
+
+    let { productID } = req.params;
+    let nameCart = "myCart";
+    
+    let removeInCart = await REDIS_BASIC.removeInCart({ nameCart, productID });
+    res.json(removeInCart)
+})
+
+app.get('/remove-all-cart/:nameCart', async (req, res) => {
+
+    let { nameCart } = req.params;
+    
+    let removeAllCart = await REDIS_BASIC.removeAllCart({ nameCart });
+    res.json(removeAllCart)
+})
+
+//===============> END
 
 app.get('/photos', (req, res) => {
  
@@ -108,7 +131,7 @@ app.get('/hashes', (req, res) => {
     res.render('hashes');
 })
 
-
+//============> THÊM, XÓA HASHES REDIS
 app.post('/add-hashes', async (req, res) => {
     try {
 
@@ -127,34 +150,9 @@ app.get('/info-hashes/:id', async (req, res) => {
     let infoHashes = await REDIS_BASIC.infoHash({id});
     res.json(infoHashes.data)
 }) 
+//===========> END
 
-app.get('/add-to-cart/:productID', async (req, res) => {
-
-    let { productID } = req.params;
-    let nameCart = "myCart";
-    
-    let addtoCart = await REDIS_BASIC.addToCart({ nameCart, productID });
-    res.json(addtoCart)
-})
-
-app.get('/remove-in-cart/:productID', async (req, res) => {
-
-    let { productID } = req.params;
-    let nameCart = "myCart";
-    
-    let removeInCart = await REDIS_BASIC.removeInCart({ nameCart, productID });
-    res.json(removeInCart)
-})
-
-app.get('/remove-all-cart/:nameCart', async (req, res) => {
-
-    let { nameCart } = req.params;
-    
-    let removeAllCart = await REDIS_BASIC.removeAllCart({ nameCart });
-    res.json(removeAllCart)
-})
-
-//Thêm cửa hàng
+//==========> LẤY VỊ TRÍ VÀ CỬA HÀNG XUNG QUANH
 app.post('/add-photo', async (req, res) => {
     try {
 
@@ -196,15 +194,14 @@ app.get('/store-near', async (req, res) => {
     }
 });
 
-
 app.get('/find-store', async (req, res) => {
 
     res.render("find-store");
 });
 
+//==============> END
+
 const uri = 'mongodb://localhost/demo-geo';
-//const uri = 'mongodb://datchen:datchen123@ds261238.mlab.com:61238/lttn-py';
-//const uri = 'mongodb+srv://datchen:datchen123@cluster0-mbx1o.mongodb.net/test';
 
 const PORT = process.env.PORT || 3000;
 
