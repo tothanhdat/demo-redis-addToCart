@@ -57,7 +57,15 @@ app.get('/', async (req, res) => {
     // let myCart = await REDIS_BASIC.myCart({ nameCart });
     // //console.log(myCart.data.reply)
     // res.render('menu', {listProduct, myCart });
-    res.redirect("/find-store")
+    res.render("home")
+});
+
+app.get('/menu-cart', async (req, res) => {
+
+    let nameCart = "myCart";
+    let myCart = await REDIS_BASIC.myCart({ nameCart });
+    //console.log(myCart.data.reply)
+    res.render('menu', {listProduct, myCart });
 });
 
 app.get('/photos', (req, res) => {

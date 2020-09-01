@@ -108,7 +108,7 @@
     $(".btnGetLocation").click(function () { //user clicks button
 	if ("geolocation" in navigator){ //check geolocation available 
 		//try to get user current location using getCurrentPosition() method
-		navigator.geolocation.getCurrentPosition(function(position){ 
+		navigator.geolocation.getCurrentPosition(function(position){
                 console.log({ position });
 				$(".locationtxt").html("Your place: " + position.coords.latitude + ", " + position.coords.longitude);
                 let lng = position.coords.longitude;
@@ -124,7 +124,6 @@
                                 
                                 $('.list-store').empty();
                                 listStore.forEach(store => {
-
                                     $('.list-store').append(`
                                         <ul class="list-group">
                                             <li class="list-group-item">${store.name} -- 
