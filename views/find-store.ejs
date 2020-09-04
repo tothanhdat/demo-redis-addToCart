@@ -27,7 +27,7 @@
     <h4>Danh sách cửa hàng gần đây</h4>
     <div class="list-store">
         <ul class="list-group list-hide">
-            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item"></li>
         </ul>
     </div>
     </div>
@@ -46,13 +46,12 @@
         $('.list-hide').hide();
     })
 
-
     $(document).on('keyup', '.maxDistance', function(e) {
         e.preventDefault();
 
-        if ("geolocation" in navigator){ //check geolocation available 
+        if ("geolocation" in navigator){ //check geolocation available
 		//try to get user current location using getCurrentPosition() method
-		navigator.geolocation.getCurrentPosition(function(position){ 
+		navigator.geolocation.getCurrentPosition(function(position){
             //console.log({ position });
             $(".locationtxt").html("Your place: " + position.coords.latitude + ", " + position.coords.longitude);
             let lng = position.coords.longitude;
